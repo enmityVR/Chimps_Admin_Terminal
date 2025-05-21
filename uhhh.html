@@ -1,191 +1,29 @@
-import React, { useState, useEffect, useRef } from 'react';
-
-// Main App Component
-function App() {
-  const [currentScreen, setCurrentScreen] = useState('terminal'); // 'terminal', 'lore-archive', 'classified-data'
-
-  // Function to navigate to different screens
-  const navigateTo = (screenName) => {
-    setCurrentScreen(screenName);
-  };
-
-  return (
-    <div className="min-h-screen bg-gray-900 text-gray-100 font-inter flex items-center justify-center p-4">
-      {currentScreen === 'terminal' && <Terminal navigateTo={navigateTo} />}
-      {currentScreen === 'lore-archive' && <LoreArchive navigateTo={navigateTo} />}
-      {currentScreen === 'classified-data' && <ClassifiedData navigateTo={navigateTo} />}
-    </div>
-  );
-}
-
-// Terminal Component
-function Terminal({ navigateTo }) {
-  const [history, setHistory] = useState([
-    { type: 'output', text: 'Initializing secure connection...' },
-    { type: 'output', text: 'Welcome, Agent. Type \'help\' for available commands.' },
-    { type: 'output', text: '' }, // Empty line for spacing
-  ]);
-  const [input, setInput] = useState('');
-  const terminalRef = useRef(null);
-
-  // Scroll to the bottom of the terminal output whenever history changes
-  useEffect(() => {
-    if (terminalRef.current) {
-      terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
-    }
-  }, [history]);
-
-  // Handle command input
-  const handleCommand = (e) => {
-    if (e.key === 'Enter') {
-      const command = input.trim();
-      setHistory((prev) => [...prev, { type: 'input', text: `> ${command}` }]);
-      setInput('');
-
-      let output = '';
-      let secretFound = false;
-
-      switch (command.toLowerCase()) {
-        case 'help':
-          output = 'Available commands:\n  clear - Clears the terminal.\n  ls - Lists files.\n  status - Checks system status.\n\nHint: There are hidden commands. Try exploring.';
-          break;
-        case 'clear':
-          setHistory([]);
-          break;
-        case 'ls':
-          output = 'Files:\n  project_aurora.log\n  encrypted_manifest.dat\n  README.txt';
-          break;
-        case 'status':
-          output = 'System status: NOMINAL. All systems online.';
-          break;
-        // Secret 1: Specific command to access Lore Archive
-        case 'access_archive':
-          output = 'Access granted. Redirecting to Lore Archive...';
-          secretFound = true;
-          setTimeout(() => navigateTo('lore-archive'), 1000);
-          break;
-        // Secret 2: Another specific command for Classified Data
-        case 'decrypt_protocol_omega':
-          output = 'Decryption successful. Accessing Classified Data...';
-          secretFound = true;
-          setTimeout(() => navigateTo('classified-data'), 1000);
-          break;
-        default:
-          output = `Command not found: '${command}'. Type 'help' for assistance.`;
-      }
-
-      if (!secretFound) {
-        setHistory((prev) => [...prev, { type: 'output', text: output }, { type: 'output', text: '' }]); // Add empty line for spacing
-      }
-    }
-  };
-
-  return (
-    <div className="w-full max-w-4xl h-[600px] bg-black border border-green-500 rounded-lg shadow-lg flex flex-col font-mono text-green-400">
-      <div className="flex-none bg-green-700 text-black p-2 rounded-t-lg">
-        <span className="font-bold">TERMINAL</span> - Secure Access
-      </div>
-      <div ref={terminalRef} className="flex-grow p-4 overflow-y-auto custom-scrollbar">
-        {history.map((line, index) => (
-          <div key={index} className={line.type === 'input' ? 'text-green-300' : 'text-green-400'}>
-            {line.text}
-          </div>
-        ))}
-      </div>
-      <div className="flex-none p-4 border-t border-green-500">
-        <input
-          type="text"
-          className="w-full bg-transparent outline-none text-green-400 caret-green-400"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleCommand}
-          autoFocus
-          spellCheck="false"
-          placeholder="Type command..."
-        />
-      </div>
-      {/* Custom Scrollbar Styles */}
-      <style>{`
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 8px;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chimps INC Admin Terminal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            overflow: hidden; /* Prevent scrollbars on the main body */
         }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: #0a0a0a;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #10B981; /* Tailwind green-500 */
-          border-radius: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: #059669; /* Tailwind green-600 */
-        }
-      `}</style>
-    </div>
-  );
-}
-
-// Lore Archive Component
-function LoreArchive({ navigateTo }) {
-  return (
-    <div className="w-full max-w-4xl bg-gray-800 text-gray-200 rounded-lg shadow-lg p-6 flex flex-col">
-      <h2 className="text-3xl font-bold text-blue-400 mb-4 border-b border-blue-600 pb-2">Lore Archive: Project Aurora</h2>
-      <div className="mb-6 text-lg leading-relaxed">
-        <p className="mb-4">
-          <strong>Entry 001: The Genesis of Aurora</strong>
-          <br />
-          Project Aurora was initiated in 2242 as humanity's last-ditch effort to colonize a new star system. After centuries of resource depletion and environmental collapse on Earth, the need for a viable off-world habitat became paramount. The project's core objective was to develop a self-sustaining ark ship capable of interstellar travel, carrying the last vestiges of human civilization.
-        </p>
-        <p className="mb-4">
-          <strong>Entry 002: The Cryo-Sleep Protocols</strong>
-          <br />
-          Thousands of individuals, carefully selected for their genetic diversity and critical skills, were placed into advanced cryo-sleep chambers. These protocols were designed to sustain life for the projected 300-year journey to the Kepler-186f system. Monitoring systems were put in place, managed by the ship's central AI, 'Orion'.
-        </p>
-        <p className="mb-4">
-          <strong>Entry 003: Anomalies Detected</strong>
-          <br />
-          Approximately 150 years into the voyage, Orion detected unusual energy signatures emanating from outside the known star charts. Initial analysis suggested a previously uncatalogued celestial body, but subsequent scans revealed highly structured, artificial signals. Orion initiated a deviation from the planned trajectory to investigate, a decision that would forever alter the course of Project Aurora.
-        </p>
-      </div>
-      <button
-        onClick={() => navigateTo('terminal')}
-        className="mt-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-md transition duration-300 ease-in-out self-start"
-      >
-        Return to Terminal
-      </button>
-    </div>
-  );
-}
-
-// Classified Data Component
-function ClassifiedData({ navigateTo }) {
-  return (
-    <div className="w-full max-w-4xl bg-red-900 text-red-200 rounded-lg shadow-lg p-6 flex flex-col border border-red-600">
-      <h2 className="text-3xl font-bold text-red-400 mb-4 border-b border-red-600 pb-2">Classified Data: Protocol Omega</h2>
-      <div className="mb-6 text-lg leading-relaxed">
-        <p className="mb-4">
-          <strong>WARNING: LEVEL 5 CLEARANCE REQUIRED</strong>
-          <br />
-          Protocol Omega is a contingency plan designed to be activated only in the event of catastrophic mission failure or an existential threat to the ark ship. It outlines procedures for extreme resource rationing, selective awakening of crew members, and, if necessary, the activation of defensive countermeasures.
-        </p>
-        <p className="mb-4">
-          <strong>Directive 7-Gamma: External Threat Assessment</strong>
-          <br />
-          In the event of hostile contact, Directive 7-Gamma authorizes the deployment of the 'Void-Shield' array and, as a last resort, the 'Purge' sequence. The Purge sequence is designed to sever all non-essential modules and initiate a high-velocity escape maneuver, sacrificing parts of the ship to ensure the survival of the core cryo-bays.
-        </p>
-        <p className="mb-4">
-          <strong>Status Update (REDACTED):</strong>
-          <br />
-          [DATA CORRUPTED] ...unidentified entity... [DATA CORRUPTED] ...signal interference... [DATA CORRUPTED] ...Orion's last log entry: "They are here."
-        </p>
-      </div>
-      <button
-        onClick={() => navigateTo('terminal')}
-        className="mt-auto px-6 py-3 bg-red-700 hover:bg-red-800 text-white font-bold rounded-md transition duration-300 ease-in-out self-start"
-      >
-        Return to Terminal
-      </button>
-    </div>
-  );
-}
-
-export default App;
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <!-- For direct embedding in a single HTML file, you can place your App component's JS here,
+         but for a real React app, a build step is standard. -->
+    <script type="module">
+        // This is where your React App component would be rendered.
+        // In a typical React build, this would be handled by the build output.
+        // For demonstration purposes, if you were to inline the App component here,
+        // you would need to ensure all React and component definitions are available.
+        // However, the standard way is to build the React app.
+    </script>
+</body>
+</html>
