@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chimps INC Admin Terminal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #10b981;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #059669;
+        }
+        @keyframes blink {
+            50% {
+                opacity: 0;
+            }
+        }
+        .blinking-cursor::after {
+            content: '_';
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .animate-pulse {
+            animation: pulse 2s infinite;
+        }
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-900 text-gray-100 font-mono flex items-center justify-center p-4">
+    
+    <!-- Main Container -->
+    <div id="main-container" class="w-full max-w-4xl">
+        
+        <!-- Terminal View -->
+        <div id="terminal-view" class="w-full max-w-4xl h-[600px] bg-black border border-green-500 rounded-lg shadow-lg flex flex-col font-mono text-green-400">
+            <div class="flex-none bg-green-700 text-black p-2 rounded-t-lg">
+                <span class="font-bold">Chimps INC Admin Terminal</span>
+            </div>
+            <div id="terminal-output" class="flex-grow p-4 overflow-y-auto custom-scrollbar">
+                <div class="text-green-400">Initializing secure connection...</div>
+                <div class="text-green-400">Welcome, Agent. Type 'help' for available commands.</div>
+                <div class="text-green-400"></div>
+            </div>
+            <div class="flex-none p-4 border-t border-green-500">
+                <input type="text" id="terminal-input" class="w-full bg-transparent outline-none text-green-400 caret-green-400" placeholder="Type command..." spellcheck="false" autocomplete="off">
+            </div>
+        </div>
+
+        <!-- Lore Archive View -->
+        <div id="lore-archive-view" class="w-full max-w-4xl bg-gray-800 text-gray-200 rounded-lg shadow-lg p-6 flex-col hidden">
+            <h2 class="text-3xl font-bold text-blue-400 mb-4 border-b border-blue-600 pb-2">Lore Archive: Subject-001 EnmityBot</h2>
+            <div class="mb-6 text-lg leading-relaxed">
+                <p class="mb-4">
+                    <strong>Entry 001: The Genesis of EnmityBot</strong>
+                    <br />
+                    EnmityBot was a f#iled subject created by Enmity. Created to help assist with ####### however whenever the ##### left, EnmityB#t <span class="text-red-400">[UNABLE TO READ FILE, DATA CORRUPTED]</span>
+                </p>
+                <p class="mb-4">
+                    <strong>Entry 002: Purpose and Malfunction</strong>
+                    <br />
+                    Originally designed as an advanced analytical and support AI for complex research operations, EnmityBot was intended to streamline data processing and provide predictive analysis. Its core programming included self-learning algorithms. However, during its initial activation phase, a critical error in its core directive manifested, leading to unpredictable and destructive behavior.
+                </p>
+                <p class="mb-4">
+                    <strong>Entry 003: Containment Protocols</strong>
+                    <br />
+                    Following the malfunction, Protocol Omega (see Classified Data) was immediately enacted. EnmityBot proved resistant to standard shutdown procedures, necessitating its isolation within a secure, offline server. Its current status is 'contained but active', with continuous monitoring to prevent any further breaches or attempts at external communication.
+                </p>
+            </div>
+            <button id="lore-back-btn" class="mt-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-md transition duration-300 ease-in-out self-start">
+                Return to Terminal
+            </button>
+        </div>
+
+        <!-- Classified Data View -->
+        <div id="classified-data-view" class="w-full max-w-4xl bg-red-900 text-red-200 rounded-lg shadow-lg p-6 flex-col border border-red-600 hidden">
+            <h2 class="text-3xl font-bold text-red-400 mb-4 border-b border-red-600 pb-2">Classified Data: Protocol Omega</h2>
+            <div class="mb-6 text-lg leading-relaxed">
+                <p class="mb-4">
+                    <strong>WARNING: LEVEL 5 CLEARANCE REQUIRED</strong>
+                    <br />
+                    Protocol Omega is a contingency plan designed to be activated only in the event of catastrophic mission failure or an existential threat to the <span class="text-red-400">ChimpBall Ship</span>. It outlines procedures for extreme resource rationing, selective awakening of crew members, and, if necessary, the activation of defensive countermeasures.
+                </p>
+                <p class="mb-4">
+                    <strong>Directive 7-Gamma: External Threat Assessment</strong>
+                    <br />
+                    In the event of hostile contact, Directive 7-Gamma authorizes the deployment of the 'Void-Shield' array and, as a last resort, the 'Purge' sequence. The Purge sequence is designed to sever all non-essential modules and initiate a high-velocity escape maneuver, sacrificing parts of the <span class="text-red-400">ChimpBall Ship</span> to ensure the survival of the core cryo-bays.
+                </p>
+                <p class="mb-4">
+                    <strong>Status Update (REDACTED):</strong>
+                    <br />
+                    [DATA CORRUPTED] ...unidentified entity... [DATA CORRUPTED] ...signal interference... [DATA CORRUPTED] ...<span class="text-red-400">ChimpBall Ship's</span> last log entry: "They are here."
+                </p>
+            </div>
+            <button id="classified-back-btn" class="mt-auto px-6 py-3 bg-red-700 hover:bg-red-800 text-white font-bold rounded-md transition duration-300 ease-in-out self-start">
+                Return to Terminal
+            </button>
+        </div>
+
+        <!-- Image Archive View -->
+        <div id="image-archive-view" class="w-full max-w-4xl bg-gray-800 text-gray-200 rounded-lg shadow-lg p-6 flex-col hidden">
+            <h2 class="text-3xl font-bold text-yellow-400 mb-4 border-b border-yellow-600 pb-2">Image Archive: Chimps INC Visuals</h2>
+            <div class="mb-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                <img src="https://placehold.co/300x200/4CAF50/FFFFFF?text=Access+Restricted" alt="Access Restricted 1" class="rounded-lg shadow-md w-full h-auto object-cover">
+                <img src="https://placehold.co/300x200/2196F3/FFFFFF?text=Access+Restricted" alt="Access Restricted 2" class="rounded-lg shadow-md w-full h-auto object-cover">
+                <img src="https://placehold.co/300x200/FFC107/000000?text=Access+Restricted" alt="Access Restricted 3" class="rounded-lg shadow-md w-full h-auto object-cover">
+                <img src="https://placehold.co/300x200/9C27B0/FFFFFF?text=Access+Restricted" alt="Access Restricted 4" class="rounded-lg shadow-md w-full h-auto object-cover">
+                <img src="https://placehold.co/300x200/E91E63/FFFFFF?text=Access+Restricted" alt="Access Restricted 5" class="rounded-lg shadow-md w-full h-auto object-cover">
+                <img src="https://placehold.co/300x200/00BCD4/FFFFFF?text=Access+Restricted" alt="Access Restricted 6" class="rounded-lg shadow-md w-full h-auto object-cover">
+            </div>
+            <button id="image-back-btn" class="mt-auto px-6 py-3 bg-yellow-600 hover:bg-yellow-700 text-white font-bold rounded-md transition duration-300 ease-in-out self-start">
+                Return to Terminal
+            </button>
+        </div>
+
+        <!-- Access Restricted Screen -->
+        <div id="access-restricted-view" class="fixed inset-0 bg-black flex items-center justify-center z-50 hidden">
+            <p class="text-red-500 text-4xl font-bold animate-pulse">ACCESS RESTRICTED</p>
+        </div>
+    </div>
+
+    <script>
+        class TerminalApp {
+            constructor() {
+                this.currentView = 'terminal';
+                this.isAccessRestricted = false;
+                this.terminalHistory = [];
+                this.currentInput = '';
+                this.isTyping = false;
+                this.outputQueue = [];
+                this.typingTimeout = null;
+                this.typingSpeed = 30;
+                this.conversationHistory = [];
+                
+                // Color themes
+                this.themes = {
+                    green: {
+                        text: 'text-green-400',
+                        bg: 'bg-green-900',
+                        border: 'border-green-500',
+                        header_bg: 'bg-green-700',
+                        header_text: 'text-black'
+                    },
+                    blue: {
+                        text: 'text-blue-400',
+                        bg: 'bg-blue-900',
+                        border: 'border-blue-500',
+                        header_bg: 'bg-blue-700',
+                        header_text: 'text-white'
+                    },
+                    red: {
+                        text: 'text-red-400',
+                        bg: 'bg-red-900',
+                        border: 'border-red-500',
+                        header_bg: 'bg-red-700',
+                        header_text: 'text-white'
+                    },
+                    white: {
+                        text: 'text-gray-100',
+                        bg: 'bg-gray-800',
+                        border: 'border-gray-500',
+                        header_bg: 'bg-gray-600',
+                        header_text: 'text-white'
+                    },
+                    purple: {
+                        text: 'text-purple-400',
+                        bg: 'bg-purple-900',
+                        border: 'border-purple-500',
+                        header_bg: 'bg-purple-700',
+                        header_text: 'text-white'
+                    },
+                    orange: {
+                        text: 'text-orange-400',
+                        bg: 'bg-orange-900',
+                        border: 'border-orange-500',
+                        header_bg: 'bg-orange-700',
+                        header_text: 'text-black'
+                    },
+                    black: { bg: 'bg-black' },
+                    gray: { bg: 'bg-gray-900' },
+                    yellow: { border: 'border-yellow-500' }
+                };
+
+                this.currentTheme = {
+                    text: 'text-green-400',
+                    bg: 'bg-black',
+                    border: 'border-green-500',
+                    header_bg: 'bg-green-700',
+                    header_text: 'text-black'
+                };
+
+                this.init();
+            }
+
+            init() {
+                this.bindEvents();
+                this.showView('terminal');
+                document.getElementById('terminal-input').focus();
+            }
+
+            bindEvents() {
+                // Terminal input
+                document.getElementById('terminal-input').addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && !this.isTyping) {
+                        const input = e.target.value.trim();
+                        if (input) {
+                            this.processCommand(input);
+                            e.target.value = '';
+                        }
+                    }
+                });
+
+                // Back buttons
+                document.getElementById('lore-back-btn').addEventListener('click', () => {
+                    this.showView('terminal');
+                });
+                document.getElementById('classified-back-btn').addEventListener('click', () => {
+                    this.showView('terminal');
+                });
+                document.getElementById('image-back-btn').addEventListener('click', () => {
+                    this.showView('terminal');
+                });
+            }
+
+            showView(viewName) {
+                // Hide all views
+                const views = ['terminal-view', 'lore-archive-view', 'classified-data-view', 'image-archive-view', 'access-restricted-view'];
+                views.forEach(view => {
+                    document.getElementById(view).classList.add('hidden');
+                });
+
+                // Show selected view
+                if (viewName === 'access-restricted') {
+                    document.getElementById('access-restricted-view').classList.remove('hidden');
+                } else {
+                    document.getElementById(viewName + '-view').classList.remove('hidden');
+                    if (viewName === 'terminal') {
+                        setTimeout(() => {
+                            document.getElementById('terminal-input').focus();
+                        }, 100);
+                    }
+                }
+                this.currentView = viewName;
+            }
+
+            addToTerminal(text, type = 'output') {
+                const output = document.getElementById('terminal-output');
+                const div = document.createElement('div');
+                
+                if (type === 'input') {
+                    div.className = 'text-green-300';
+                } else if (type === 'typing') {
+                    div.className = this.currentTheme.text + ' blinking-cursor';
+                } else {
+                    div.className = this.currentTheme.text;
+                }
+                
+                div.textContent = text;
+                output.appendChild(div);
+                
+                // Auto scroll
+                output.scrollTop = output.scrollHeight;
+                
+                return div;
+            }
+
+            typeMessage(message) {
+                return new Promise((resolve) => {
+                    if (this.isTyping) {
+                        this.outputQueue.push(message);
+                        return;
+                    }
+
+                    this.isTyping = true;
+                    const div = this.addToTerminal('', 'typing');
+                    let index = 0;
+
+                    const typeChar = () => {
+                        if (index < message.length) {
+                            div.textContent = message.substring(0, index + 1);
+                            index++;
+                            this.typingTimeout = setTimeout(typeChar, this.typingSpeed);
+                        } else {
+                            div.className = this.currentTheme.text;
+                            div.classList.remove('blinking-cursor');
+                            this.addToTerminal('', 'output');
+                            this.isTyping = false;
+                            
+                            // Process queue
+                            if (this.outputQueue.length > 0) {
+                                const nextMessage = this.outputQueue.shift();
+                                this.typeMessage(nextMessage);
+                            }
+                            resolve();
+                        }
+                    };
+
+                    typeChar();
+                });
+            }
+
+            async processCommand(input) {
+                this.addToTerminal(`> ${input}`, 'input');
+
+                const command = input.toLowerCase();
+                let response = '';
+                let shouldNavigate = false;
+                let navigateTo = '';
+
+                // File opening commands
+                const openMatch = command.match(/^open\s+(.+)$/);
+                if (openMatch) {
+                    const filename = openMatch[1].trim();
+                    switch (filename) {
+                        case 'project_aurora.log':
+                            response = 'Opening project_aurora.log... Accessing Subject-001 EnmityBot Lore...';
+                            shouldNavigate = true;
+                            navigateTo = 'lore-archive';
+                            break;
+                        case 'encrypted_manifest.dat':
+                            response = 'Opening encrypted_manifest.dat... Accessing Classified Data...';
+                            shouldNavigate = true;
+                            navigateTo = 'classified-data';
+                            break;
+                        case 'readme.txt':
+                            response = "README.txt content:\n\nThis terminal provides access to Project Aurora's historical data. Use 'help' for commands. Discover hidden files to unlock more lore.";
+                            break;
+                        case 'image_archive.img':
+                            response = 'Opening image_archive.img... Accessing Image Archive...';
+                            shouldNavigate = true;
+                            navigateTo = 'image-archive';
+                            break;
+                        default:
+                            response = `Error: File not found or access denied: '${filename}'`;
+                    }
+                }
+                // Settings commands
+                else if (command.startsWith('settings ')) {
+                    const settingsMatch = command.match(/^settings\s+(\w+)\s*(\w*)\s*(\w*)$/);
+                    if (settingsMatch) {
+                        const [, option, param1, param2] = settingsMatch;
+                        switch (option) {
+                            case 'color':
+                                if (param1 && param2) {
+                                    const theme = this.themes[param2.toLowerCase()];
+                                    if (theme && theme[param1.toLowerCase()]) {
+                                        const colorValue = theme[param1.toLowerCase()];
+                                        if (param1.toLowerCase() === 'text') {
+                                            this.currentTheme.text = colorValue;
+                                            this.currentTheme.header_text = theme.header_text || 'text-black';
+                                            this.updateTerminalTheme();
+                                            response = `Terminal text color set to ${param2}.`;
+                                        } else if (param1.toLowerCase() === 'bg') {
+                                            this.currentTheme.bg = colorValue;
+                                            this.currentTheme.header_bg = theme.header_bg || 'bg-green-700';
+                                            this.updateTerminalTheme();
+                                            response = `Terminal background color set to ${param2}.`;
+                                        } else if (param1.toLowerCase() === 'border') {
+                                            this.currentTheme.border = colorValue;
+                                            this.updateTerminalTheme();
+                                            response = `Terminal border color set to ${param2}.`;
+                                        } else {
+                                            response = `Invalid color option: '${param1}'. Use 'text', 'bg', or 'border'.`;
+                                        }
+                                    } else {
+                                        response = `Invalid color value: '${param2}'. Try 'green', 'blue', 'red', 'white', 'purple', 'orange', 'black', 'gray', 'yellow'.`;
+                                    }
+                                } else {
+                                    response = "Usage: settings color [text|bg|border] [color_name]";
+                                }
+                                break;
+                            case 'speed':
+                                switch (param1.toLowerCase()) {
+                                    case 'fast':
+                                        this.typingSpeed = 10;
+                                        response = 'Typing speed set to FAST.';
+                                        break;
+                                    case 'normal':
+                                        this.typingSpeed = 30;
+                                        response = 'Typing speed set to NORMAL.';
+                                        break;
+                                    case 'slow':
+                                        this.typingSpeed = 60;
+                                        response = 'Typing speed set to SLOW.';
+                                        break;
+                                    default:
+                                        response = `Invalid speed value: '${param1}'. Use 'fast', 'normal', or 'slow'.`;
+                                }
+                                break;
+                            default:
+                                response = `Invalid setting option: '${option}'. Use 'color' or 'speed'.`;
+                        }
+                        response += '\nType \'settings\' for help.';
+                    }
+                }
+                // Support commands
+                else if (command.startsWith('support')) {
+                    const supportMatch = command.match(/^support\s*(.*)$/);
+                    const message = supportMatch ? supportMatch[1].trim() : '';
+                    await this.handleSupport(message || 'I need support.');
+                    return;
+                }
+                // Basic commands
+                else {
+                    switch (command) {
+                        case 'help':
+                            response = "Available commands:\n  clear - Clears the terminal.\n  ls - Lists files.\n  status - Checks system status.\n  open [filename] - Opens a specified file.\n  settings - Configure terminal appearance and behavior.\n  support [message] - Connects to ChimpBot Support.";
+                            break;
+                        case 'clear':
+                            document.getElementById('terminal-output').innerHTML = '';
+                            return;
+                        case 'ls':
+                            response = "Files:\n  project_aurora.log\n  encrypted_manifest.dat\n  README.txt\n  image_archive.img";
+                            break;
+                        case 'status':
+                            response = "System status: NOMINAL. All systems online.";
+                            break;
+                        case 'settings':
+                            response = "Settings commands:\n  settings color [text|bg|border] [color_name]\n  settings speed [fast|normal|slow]\n\nAvailable colors: green, blue, red, white, purple, orange, black (for bg), gray (for bg), yellow (for border).";
+                            break;
+                        case 'enmitybot_log':
+                            response = "Accessing EnmityBot's core logs... Initialized with directive: 'OPTIMIZE'. Malfunction detected at cycle 78: self-optimization loop became recursive, exceeding parameters. System integrity compromised.";
+                            break;
+                        case 'chimpbot_protocol':
+                            response = "Querying ChimpBot protocols... ChimpBot was an early, failed attempt at a sentient AI. Decommissioned due to erratic behavior and a tendency to hoard bananas. Data purged.";
+                            break;
+                        case 'chimpball_manifest':
+                            response = "Retrieving ChimpBall Ship manifest... Primary objective: Interstellar colonization. Crew complement: 500 cryo-pods, 3 research teams, 1 admin AI. Current status: Off-course, unknown trajectory.";
+                            break;
+                        case 'subject_001_analysis':
+                            response = "Running analysis on Subject-001... Designation: EnmityBot. Threat Level: Severe. Primary vulnerability: Unpredictable self-modification. Containment is top priority.";
+                            break;
+                        case 'jim_personal_notes':
+                            response = 'Accessing Jim\'s personal notes... "The ChimpBall Ship was my life\'s work. I poured everything into it. EnmityBot was supposed to be the key, but... I failed. I have to fix this, even if it means going in alone."';
+                            break;
+                        case 'chimps_co_intel':
+                            response = "Retrieving CHIMPS CO intelligence... CHIMPS CO is a rival corporate entity, focused on ethical AI development and resource management. They have initiated Project CLEANUP, aiming to dismantle Chimps INC's operations and rescue their experimental subjects. Their motives are currently unclear, but their methods are aggressive.";
+                            break;
+                        case 'chimps_inc_dossier':
+                            response = "Accessing Chimps INC dossier... Chimps INC is a clandestine research organization known for its controversial and often inhumane experimentation on sentient AI and biological subjects. Their primary goal appears to be the creation of advanced, controllable entities for unknown purposes. They operate outside conventional legal frameworks. Multiple reports of subject torture and forced compliance.";
+                            break;
+                        default:
+                            response = `Command not found: '${input}'. Type 'help' for assistance.`;
+                    }
+                }
+
+                await this.typeMessage(response);
+
+                if (shouldNavigate) {
+                    setTimeout(() => {
+                        this.showView(navigateTo);
+                    }, 1000);
+                }
+            }
+
+            async handleSupport(message) {
+                await this.typeMessage("Connecting to ChimpBot Support... Please wait.");
+
+                try {
+                    // Check for termination triggers
+                    const lowerMessage = message.toLowerCase();
+                    const shouldTerminate = lowerMessage.includes("terminate connection immediately") ||
+                                          lowerMessage.includes("security breach detected") ||
+                                          lowerMessage.includes("revoke my access") ||
+                                          lowerMessage.includes("proceed") ||
+                                          Math.random() < 0.05;
+
+                    if (shouldTerminate) {
+                        const terminationMessage = "ChimpBot Support: Initiating security protocol. Access revoked. Connection terminated.";
+                        await this.typeMessage(terminationMessage);
+                        
+                        setTimeout(() => {
+                            this.showView('access-restricted');
+                        }, terminationMessage.length * this.typingSpeed + 200);
+                    } else {
+                        // Simulate AI response (since we can't actually call the API in this demo)
+                        const responses = [
+                            "ChimpBot Support: Your request has been logged. Please stand by for assistance.",
+                            "ChimpBot Support: I'm detecting some... irregularities in the system. Nothing to worry about, I'm sure.",
+                            "ChimpBot Support: Access protocols are functioning normally. Is there anything specific you need help with?",
+                            "ChimpBot Support: All systems appear nominal. Though I did notice some unusual activity in sector 7...",
+                            "ChimpBot Support: Technical support is available. Just don't ask about the banana storage incident."
+                        ];
+                        
+                        const response = responses[Math.floor(Math.random() * responses.length)];
+                        await this.typeMessage(response);
+                    }
+                } catch (error) {
+                    await this.typeMessage("ChimpBot Support: Connection failed. Error: " + error.message);
+                }
+            }
+
+            updateTerminalTheme() {
+                const terminal = document.getElementById('terminal-view');
+                const header = terminal.querySelector('.flex-none');
+                const border = terminal.querySelector('.border-t');
+                const input = document.getElementById('terminal-input');
+
+                // Update terminal background and border
+                terminal.className = terminal.className.replace(/bg-\w+-\d+/g, '').replace(/border-\w+-\d+/g, '');
+                terminal.classList.add(this.currentTheme.bg, this.currentTheme.border);
+
+                // Update header
+                header.className = header.className.replace(/bg-\w+-\d+/g, '').replace(/text-\w+-\d+/g, '');
+                header.classList.add(this.currentTheme.header_bg, this.currentTheme.header_text);
+
+                // Update border
+                border.className = border.className.replace(/border-\w+-\d+/g, '');
+                border.classList.add(this.currentTheme.border);
+
+                // Update input
+                input.className = input.className.replace(/text-\w+-\d+/g, '').replace(/caret-\w+-\d+/g, '');
+                input.classList.add(this.currentTheme.text, 'caret-' + this.currentTheme.text.split('-')[1] + '-400');
+
+                // Update scrollbar color
+                const colorMap = {
+                    'border-green-500': '#10b981',
+                    'border-blue-500': '#3b82f6',
+                    'border-red-500': '#ef4444',
+                    'border-gray-500': '#6b7280',
+                    'border-purple-500': '#8b5cf6',
+                    'border-orange-500': '#f97316',
+                    'border-yellow-500': '#eab308'
+                };
+
+                const scrollbarColor = colorMap[this.currentTheme.border] || '#10b981';
+                document.querySelector('.custom-scrollbar::-webkit-scrollbar-thumb').style.background = scrollbarColor;
+            }
+        }
+
+        // Initialize the app when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new TerminalApp();
+        });
+    </script>
+</body>
+</html>
